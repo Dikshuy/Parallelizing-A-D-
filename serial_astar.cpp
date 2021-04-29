@@ -45,7 +45,7 @@ class CELL{
 
     CELL() {};
 
-	CELL(int X, int Y, bool state = true) :x(X), y(Y), isLet(state) {};
+	CELL(int X, int Y, bool state = true) :x(X), y(Y), isLet(state) { };
      
     void setPos(int X, int Y){
         x = X;
@@ -53,7 +53,7 @@ class CELL{
     }
 
     bool operator==(CELL obj){
-        return this->x == obj.x && this-y == obj.y;
+        return this->x == obj.x && this->y == obj.y;
     }
 
     vector <CELL> getnearby(CELL area[][WIDTH]){
@@ -74,7 +74,7 @@ float distance(CELL start, CELL finish) {
 	return sqrt(pow(finish.x - start.x, 2) + pow(finish.y - start.y, 2));
 }
 
-vector <CELL> astar(CELL start, CELL finish, CELL area[HEIGHT][WIDTH]){
+vector <CELL> astar(CELL start, CELL target, CELL area[HEIGHT][WIDTH]){
     vector <CELL> returnPath;
     vector <CELL> openSet;
     int i,j;
@@ -96,4 +96,60 @@ vector <CELL> astar(CELL start, CELL finish, CELL area[HEIGHT][WIDTH]){
         }
     }
 
+    openSet.push_back(start);
+    openSet[0].g = 0;
+    openSet[0].f = distance(openSet[0], area[target.y][target.x]);
+    openSet[0].camefrom = -1;
+
+    vector <CELL> path;
+    int k = 0;
+
+    while (openSet.size() != 0){
+        CELL current;
+        int minF = 0;
+
+        for (i=0; i< openSet.size(); i++){
+            if (openSet[minF].F > openSet[i].f){
+                minF = i;
+            }
+        }
+        current = openSet[minF];
+        path.push_back(current);
+
+        if (current == target){
+            cout << "path found!"<<endl;
+            break;
+        }
+
+        vector <CELL>::iterator iter = find(openSet.begin(), openSet.end(), current);
+        openSet.erase(iter);
+
+        vector <CELL> neighbors = current.getnearby(area);
+
+        for (i=0; i<neighbors.size(); i++){
+            float g_tmp;
+            if (abs(current.x - neighbors[i].x) == 1 && abs(current.y - neighbors[i].y) == 1)
+                g_tmp = current.g + D2;
+            else
+                g_tmp = current.g + D;
+
+            if (g_tmp < neighbors[i].g && neighbors[i].isLet == true)
+                neighbors[i].camefrom = k;
+                neighbors[i].g = g_tmp;
+                neighbors[i].h = ceil(distance(neighbors[i], target));
+                neighbors[i].calculate_f();
+
+                if (find(openSet.begin(), openSet.end(), neighbors[i]) == openSet.end())
+                    openSet.push_back(neighbors[i]);
+        }
+    }
+    k++;
+    CELL current = openSet[openSet.size() - 1];
+
+	do {
+		current = path[current.camefrom];
+		returnPath.push_back(current);
+	} while (current.camefrom != -1);
+
+	return returnPath;
 }
