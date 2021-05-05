@@ -87,11 +87,11 @@ vector <CELL> astar(CELL start, CELL target, CELL area[HEIGHT][WIDTH]){
 
             if (map[i][j]=='#'){
                 area[i][j].isLet = false;
-                area[i][j].sym = "#";
+                area[i][j].sym = '#';
             }
             else{
                 area[i][j].isLet = true;
-                area[i][j].sym = ".";
+                area[i][j].sym = '.';
             }
         }
     }
@@ -109,7 +109,7 @@ vector <CELL> astar(CELL start, CELL target, CELL area[HEIGHT][WIDTH]){
         int minF = 0;
 
         for (i=0; i< openSet.size(); i++){
-            if (openSet[minF].F > openSet[i].f){
+            if (openSet[minF].f > openSet[i].f){
                 minF = i;
             }
         }
@@ -152,4 +152,41 @@ vector <CELL> astar(CELL start, CELL target, CELL area[HEIGHT][WIDTH]){
 	} while (current.camefrom != -1);
 
 	return returnPath;
+}
+
+int main(){
+    system("cls");
+    srand(clock());
+    int i,j;
+
+    CELL area[HEIGHT][WIDTH];
+    do{
+        system("cls");
+        int startX = 0, startY = 1;
+        do{
+            startX = rand() % WIDTH;
+            startY = rand() % HEIGHT;
+        }
+        while (area[startX][startY].isLet == false);
+        
+        int targetX = 43, targetY = 1;
+        do{
+            targetX = rand() % WIDTH;
+            targetY = rand() % HEIGHT;
+        }
+        while (area[targetX][targetY].isLet == false);
+
+        clock_t start = clock();
+        cout<<"Finding the best path......."<<endl;
+        vector<CELL> path = astar(CELL(startX, startY), CELL(targetX, targetY), area);
+
+        for (i=0; i<path.size(); i++){
+            area[path[i].y][path[i].x].sym = '+';
+        }
+
+        area[startY][startX].sym = 'S';
+        area[targetY][targetX].sym = 'F';
+    }
+    while(true);
+    return 0;
 }
