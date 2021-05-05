@@ -2,6 +2,10 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
+#include <conio.h>
+#include <Windows.h>
 
 using namespace std;
 
@@ -30,6 +34,31 @@ const char map[HEIGHT][WIDTH] = {
 	"...#.................#.....#.........#......#..............",
 	"...#......#..........#.....#.........#......#.............."
 };
+
+enum ConsoleColor{
+	Black = 0,
+	Blue = 1,
+	Green = 2,
+	Cyan = 3,
+	Red = 4,
+	Magenta = 5,
+	Brown = 6,
+	LightGray = 7,
+	DarkGray = 8,
+	LightBlue = 9,
+	LightGreen = 10,
+	LightCyan = 11,
+	LightRed = 12,
+	LightMagenta = 13,
+	Yellow = 14,
+	White = 15
+};
+
+void SetColor(int text, int background)
+{
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hStdOut, (WORD)((background << 4) | text));
+}
 
 class CELL{
     public:
@@ -186,6 +215,14 @@ int main(){
 
         area[startY][startX].sym = 'S';
         area[targetY][targetX].sym = 'F';
+        
+        cout<<endl;
+
+        for (i=0; i<HEIGHT; i++){
+            for (j=0; j<WIDTH; j++){
+                if (area[i][j].sym=='+') 
+            }
+        }
     }
     while(true);
     return 0;
