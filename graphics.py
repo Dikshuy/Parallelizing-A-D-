@@ -119,11 +119,15 @@ for row in range(GRID_HEIGHT):
     for column in range(GRID_WIDTH):
         grid[row].append(1)  
 
+pygame.mixer.init()
 pygame.init()
 WINDOW_SIZE = [TEMP*GRID_WIDTH, TEMP*GRID_HEIGHT]
 screen = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("MAP")
 clock = pygame.time.Clock()
+pygame.mixer.music.load("wieee.mp3")
+pygame.mixer.music.play(loops=-1)
+
 screen.fill(BLACK)
 for row in range(GRID_HEIGHT):
 	for column in range(GRID_WIDTH):
