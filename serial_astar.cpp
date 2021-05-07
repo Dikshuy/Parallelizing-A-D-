@@ -5,7 +5,10 @@
 #include <ctime>
 #include <cstdlib>
 #include <conio.h>
-#include <Windows.h>
+#include <unistd.h>
+#include <windows.h>
+#include <w32api/include/w32api.h>
+// #include <Windows.h>
 
 using namespace std;
 
