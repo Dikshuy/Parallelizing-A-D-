@@ -387,6 +387,7 @@ int main()
 	int grid[ROW][COL];
 	int inp_count = 0;
 	for(int i=0;i<height;i++){
+		#pragma omp parallel for schedule(static) private(j)
 		for(int j=0;j<width;j++){
 				if(map >> grid[i][j]){
 					inp_count++;	
