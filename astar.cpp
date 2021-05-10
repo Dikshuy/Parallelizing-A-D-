@@ -135,6 +135,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 
         // quit searching when the goal state is reached
         //if((*n0).estimate(xFinish, yFinish) == 0)
+        cell check[ROW][COL];
         if(x==xFinish && y==yFinish) 
         {
             // generate the path from finish to start
@@ -145,9 +146,11 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
                 j=dir_map[x][y];
                 c='0'+(j+dir/2)%dir;
                 path=c+path;
-                tracePath(,dest,sol);
                 x+=dx[j];
                 y+=dy[j];
+                check[x][y].parent_i = x;
+                check[x][y].parent_j = y;
+                tracePath(check,dest,sol);
             }
 
             delete n0;
@@ -221,7 +224,7 @@ int main(){
 	fstream position;
 	ofstream myfile;
 	string Xdimension, Ydimension, filename1, filename2;
-	filename1 = "maps.txt";
+	filename1 = "map.txt";
 	filename2 = "position.txt";
 	maps.open(filename1.c_str());
 	position.open(filename2.c_str());
