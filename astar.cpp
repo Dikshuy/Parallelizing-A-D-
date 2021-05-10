@@ -1,42 +1,27 @@
-#include<bits/stdc++.h> 
+#include <bits/stdc++.h> 
+#include <iostream>
+#include <iomanip>
+#include <queue>
+#include <string>
+#include <math.h>
+
 using namespace std; 
 
-#define ROW 200
-#define COL 200
+#define ROW 50
+#define COL 50
 
 typedef pair<int, int> Pair; 
-typedef pair<double, pair<int, int>> pPair; 
+static int maps[ROW][COL];
+static int closed_nodes_map[ROW][COL]; // map of closed (tried-out) nodes
+static int open_nodes_map[ROW][COL]; // map of open (not-yet-tried) nodes
+static int dir_map[ROW][COL]; // map of directions
+const int dir=8; // number of possible directions to go at any position
+static int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
+static int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
 struct cell {
 	int parent_i, parent_j; 
-	// f = g + h 
-	double f, g, h; 
 }; 
-
-bool isValid(int row, int col, int H, int W) { 
-	// returns true if row number and column number is in range 
-	return (row >= 0) && (row < H) && (col >= 0) && (col < W); 
-} 
-
-// 0 represents occupied cell, 1 represents free cell and 2 represents the cell in the optimal path
-bool isUnBlocked(int grid[][COL], int row, int col) { 
-	// returns true if the cell is not blocked else false 
-	if (grid[row][col] == 1 || grid[row][col] == 2) 
-		return (true); 
-	else
-		return (false); 
-} 
-
-bool isDestination(int row, int col, Pair dest) { 
-	if (row == dest.first && col == dest.second) 
-		return (true); 
-	else
-		return (false); 
-} 
- 
-double calculateHValue(int row, int col, Pair dest) {  
-	return ((double)sqrt ((row-dest.first)*(row-dest.first) + (col-dest.second)*(col-dest.second))); 
-} 
 
 void tracePath(cell cellDetails[][COL], Pair dest, vector<Pair> *solvec) { 
 	printf ("optmial path Found :)"); 
@@ -64,315 +49,185 @@ void tracePath(cell cellDetails[][COL], Pair dest, vector<Pair> *solvec) {
 	return; 
 } 
 
-void aStarSearch(int grid[][COL], int H, int W, Pair src, Pair dest, vector<Pair> *sol) {
-	// validation check 
-	if (isValid (src.first, src.second, H, W) == false) { 
-		printf ("Source is invalid"); 
-		return; 
-	} 
-	if (isValid (dest.first, dest.second, H, W) == false) { 
-		printf ("Destination is invalid"); 
-		return; 
-	} 
+class node
+{
+    int xPos;
+    int yPos;
+    // total distance already travelled to reach the node(g)
+    int level;
+    // priority=level+remaining distance estimate(h)
+    int priority;  // smaller: higher priority(f)
 
-	// blocking check
-	if (isUnBlocked(grid, src.first, src.second) == false) { 
-		printf ("Source is blocked"); 
-		return; 
-	} 
-	if (isUnBlocked(grid, dest.first, dest.second) == false) { 
-		printf ("Destination is blocked"); 
-		return; 
-	} 
+    public:
+        node(int xp, int yp, int d, int p) 
+            {xPos=xp; yPos=yp; level=d; priority=p;}
+    
+        int getxPos() const {return xPos;}
+        int getyPos() const {return yPos;}
+        int getLevel() const {return level;}
+        int getPriority() const {return priority;}
 
-	// if the destination cell is the same as source cell 
-	if (isDestination(src.first, src.second, dest) == true) { 
-		printf ("We are already at the destination"); 
-		return; 
-	} 
-	
-	bool closedList[ROW][COL]; 
-	memset(closedList, false, sizeof (closedList)); 
- 
-	cell cellDetails[ROW][COL]; 
+        void updatePriority(const int & xDest, const int & yDest)
+        {
+             priority=level+estimate(xDest, yDest)*10; //f(priority) = g(level)+h(estimate)
+        }
 
-	int i, j; 
+        void nextLevel(const int & i) 
+        {
+             level+=(dir==8?(i%2==0?10:14):10);
+        }
+        
+        const int & estimate(const int & xDest, const int & yDest) const
+        {
+            static int xd, yd, d;
+            xd=xDest-xPos;
+            yd=yDest-yPos;         
+            d=static_cast<int>(sqrt(xd*xd+yd*yd));
+            return(d);
+        }
+};
 
-	for (i=0; i<ROW; i++) { 
-		for (j=0; j<COL; j++) { 
-			cellDetails[i][j].f = FLT_MAX; 
-			cellDetails[i][j].g = FLT_MAX; 
-			cellDetails[i][j].h = FLT_MAX; 
-			cellDetails[i][j].parent_i = -1; 
-			cellDetails[i][j].parent_j = -1; 
-		} 
-	} 
+bool operator<(const node & a, const node & b)
+{
+  return a.getPriority() > b.getPriority();
+}
 
-	i = src.first, j = src.second; 
-	cellDetails[i][j].f = 0.0; 
-	cellDetails[i][j].g = 0.0; 
-	cellDetails[i][j].h = 0.0; 
-	cellDetails[i][j].parent_i = i; 
-	cellDetails[i][j].parent_j = j; 
+string pathFind( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, vector<Pair> *sol)
+{
+    static priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
+    static int pqi; // pq index
+    static node* n0;
+    static node* m0;
+    static int i, j, x, y, xdx, ydy;
+    static char c;
+    pqi=0;
+    Pair dest = make_pair(*dx, *dy);
 
-	set<pPair> openList; 
-	openList.insert(make_pair (0.0, make_pair (i, j)));
-	bool foundDest = false; 
+    // reset the node maps
+    for(y=0;y<COL;y++)
+    {
+        for(x=0;x<ROW;x++)
+        {
+            closed_nodes_map[x][y]=0;
+            open_nodes_map[x][y]=0;
+        }
+    }
 
-	while (!openList.empty()) 
-	{ 
-		pPair p = *openList.begin(); 
-		openList.erase(openList.begin()); 
-		i = p.second.first; 
-		j = p.second.second; 
-		closedList[i][j] = true; 
-	
-	/* 
-		Generating all the 8 successor of this cell 
+    // create the start node and push into list of open nodes
+    n0=new node(xStart, yStart, 0, 0);
+    n0->updatePriority(xFinish, yFinish);
+    pq[pqi].push(*n0);
+    open_nodes_map[x][y]=n0->getPriority(); // mark it on the open nodes map
 
-			N.W   N   N.E 
-			  \   |   / 
-			   \  |  / 
-			W----Cell----E 
-			   /  |  \ 
-			  /   |   \ 
-			S.W   S   S.E 
+    // A* search
+    while(!pq[pqi].empty())
+    {
+        // get the current node w/ the highest priority
+        // from the list of open nodes
+        n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority());
 
-		Cell-->Popped Cell (i, j) 
-		N --> North	 (i-1, j) 
-		S --> South	 (i+1, j) 
-		E --> East	 (i, j+1) 
-		W --> West		 (i, j-1) 
-		N.E--> North-East (i-1, j+1) 
-		N.W--> North-West (i-1, j-1) 
-		S.E--> South-East (i+1, j+1) 
-		S.W--> South-West (i+1, j-1)*/
+        x=n0->getxPos(); y=n0->getyPos();
 
-		
-		double gNew, hNew, fNew; 
+        pq[pqi].pop(); // remove the node from the open list
+        open_nodes_map[x][y]=0;
+        // mark it on the closed nodes map
+        closed_nodes_map[x][y]=1;
 
-		//----------- 1st Successor (North) ------------ 
+        // quit searching when the goal state is reached
+        //if((*n0).estimate(xFinish, yFinish) == 0)
+        if(x==xFinish && y==yFinish) 
+        {
+            // generate the path from finish to start
+            // by following the directions
+            string path="";
+            while(!(x==xStart && y==yStart))
+            {
+                j=dir_map[x][y];
+                c='0'+(j+dir/2)%dir;
+                path=c+path;
+                tracePath(,dest,sol);
+                x+=dx[j];
+                y+=dy[j];
+            }
 
-		if (isValid(i-1, j, H, W) == true) {
-			if (isDestination(i-1, j, dest) == true) {  
-				cellDetails[i-1][j].parent_i = i; 
-				cellDetails[i-1][j].parent_j = j;  
-				tracePath (cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i-1][j] == false && isUnBlocked(grid, i-1, j) == true) 
-			{ 
-				gNew = cellDetails[i][j].g + 1.0; 
-				hNew = calculateHValue (i-1, j, dest); 
-				fNew = gNew + hNew;  
-				if (cellDetails[i-1][j].f == FLT_MAX || cellDetails[i-1][j].f > fNew) 
-				{ 
-					openList.insert( make_pair(fNew, make_pair(i-1, j)));
-					cellDetails[i-1][j].f = fNew; 
-					cellDetails[i-1][j].g = gNew; 
-					cellDetails[i-1][j].h = hNew; 
-					cellDetails[i-1][j].parent_i = i; 
-					cellDetails[i-1][j].parent_j = j; 
-				} 
-			} 
-		} 
+            delete n0;
+            while(!pq[pqi].empty()) pq[pqi].pop();           
+            return path;
+        }
 
-		//----------- 2nd Successor (South) ------------ 
+        // generate moves (child nodes) in all possible directions
+        for(i=0;i<dir;i++)
+        {
+            xdx=x+dx[i]; ydy=y+dy[i];
 
-		if (isValid(i+1, j, H, W) == true) { 
-			if (isDestination(i+1, j, dest) == true) {  
-				cellDetails[i+1][j].parent_i = i; 
-				cellDetails[i+1][j].parent_j = j;  
-				tracePath(cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i+1][j] == false && isUnBlocked(grid, i+1, j) == true) { 
-				gNew = cellDetails[i][j].g + 1.0; 
-				hNew = calculateHValue(i+1, j, dest); 
-				fNew = gNew + hNew; 
-				if (cellDetails[i+1][j].f == FLT_MAX || cellDetails[i+1][j].f > fNew) { 
-					openList.insert( make_pair (fNew, make_pair (i+1, j)));
-					cellDetails[i+1][j].f = fNew; 
-					cellDetails[i+1][j].g = gNew; 
-					cellDetails[i+1][j].h = hNew; 
-					cellDetails[i+1][j].parent_i = i; 
-					cellDetails[i+1][j].parent_j = j; 
-				} 
-			} 
-		} 
+            if(!(xdx<0 || xdx>ROW-1 || ydy<0 || ydy>COL-1 || maps[xdx][ydy]==1 
+                || closed_nodes_map[xdx][ydy]==1))
+            {
+                // generate a child node
+                m0=new node( xdx, ydy, n0->getLevel(), 
+                             n0->getPriority());
+                m0->nextLevel(i);
+                m0->updatePriority(xFinish, yFinish);
 
-		//----------- 3rd Successor (East) ------------ 
+                // if it is not in the open list then add into that
+                if(open_nodes_map[xdx][ydy]==0)
+                {
+                    open_nodes_map[xdx][ydy]=m0->getPriority();
+                    pq[pqi].push(*m0);
+                    // mark its parent node direction
+                    dir_map[xdx][ydy]=(i+dir/2)%dir;
+                }
+                else if(open_nodes_map[xdx][ydy]>m0->getPriority())
+                {
+                    // update the priority info
+                    open_nodes_map[xdx][ydy]=m0->getPriority();
+                    // update the parent direction info
+                    dir_map[xdx][ydy]=(i+dir/2)%dir;
 
-		if (isValid (i, j+1, H, W) == true) { 
-			if (isDestination(i, j+1, dest) == true) { 
-				cellDetails[i][j+1].parent_i = i; 
-				cellDetails[i][j+1].parent_j = j; 
-				tracePath(cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i][j+1] == false && isUnBlocked (grid, i, j+1) == true) { 
-				gNew = cellDetails[i][j].g + 1.0; 
-				hNew = calculateHValue (i, j+1, dest); 
-				fNew = gNew + hNew; 
-				if (cellDetails[i][j+1].f == FLT_MAX || cellDetails[i][j+1].f > fNew) { 
-					openList.insert( make_pair(fNew, make_pair (i, j+1)));
-					cellDetails[i][j+1].f = fNew; 
-					cellDetails[i][j+1].g = gNew; 
-					cellDetails[i][j+1].h = hNew; 
-					cellDetails[i][j+1].parent_i = i; 
-					cellDetails[i][j+1].parent_j = j; 
-				} 
-			} 
-		} 
+                    // replace the node
+                    // by emptying one pq to the other one
+                    // except the node to be replaced will be ignored
+                    // and the new node will be pushed in instead
+                    while(!(pq[pqi].top().getxPos()==xdx && 
+                           pq[pqi].top().getyPos()==ydy))
+                    {                
+                        pq[1-pqi].push(pq[pqi].top());
+                        pq[pqi].pop();       
+                    }
+                    pq[pqi].pop(); // remove the wanted node
+                    
+                    // empty the larger size pq to the smaller one
+                    if(pq[pqi].size()>pq[1-pqi].size()) pqi=1-pqi;
+                    while(!pq[pqi].empty())
+                    {                
+                        pq[1-pqi].push(pq[pqi].top());
+                        pq[pqi].pop();       
+                    }
+                    pqi=1-pqi;
+                    pq[pqi].push(*m0); // add the better node instead
+                }
+                else delete m0; 
+            }
+        }
+        delete n0; 
+    }
+    return ""; 
+}
 
-		//----------- 4th Successor (West) ------------ 
- 
-		if (isValid(i, j-1, H, W) == true) {
-			if (isDestination(i, j-1, dest) == true) { 
-				cellDetails[i][j-1].parent_i = i; 
-				cellDetails[i][j-1].parent_j = j; 
-				tracePath(cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i][j-1] == false && isUnBlocked(grid, i, j-1) == true) { 
-				gNew = cellDetails[i][j].g + 1.0; 
-				hNew = calculateHValue(i, j-1, dest); 
-				fNew = gNew + hNew;  
-				if (cellDetails[i][j-1].f == FLT_MAX || cellDetails[i][j-1].f > fNew) { 
-					openList.insert( make_pair (fNew, make_pair (i, j-1)));
-					cellDetails[i][j-1].f = fNew; 
-					cellDetails[i][j-1].g = gNew; 
-					cellDetails[i][j-1].h = hNew; 
-					cellDetails[i][j-1].parent_i = i; 
-					cellDetails[i][j-1].parent_j = j; 
-				} 
-			} 
-		} 
-
-		//----------- 5th Successor (North-East) ------------ 
-
-		if (isValid(i-1, j+1, H, W) == true) {  
-			if (isDestination(i-1, j+1, dest) == true) { 
-				cellDetails[i-1][j+1].parent_i = i; 
-				cellDetails[i-1][j+1].parent_j = j; 
-				tracePath (cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i-1][j+1] == false && isUnBlocked(grid, i-1, j+1) == true) { 
-				gNew = cellDetails[i][j].g + 1.414; 
-				hNew = calculateHValue(i-1, j+1, dest); 
-				fNew = gNew + hNew; 
-				if (cellDetails[i-1][j+1].f == FLT_MAX || cellDetails[i-1][j+1].f > fNew) { 
-					openList.insert( make_pair (fNew, make_pair(i-1, j+1)));
-					cellDetails[i-1][j+1].f = fNew; 
-					cellDetails[i-1][j+1].g = gNew; 
-					cellDetails[i-1][j+1].h = hNew; 
-					cellDetails[i-1][j+1].parent_i = i; 
-					cellDetails[i-1][j+1].parent_j = j; 
-				} 
-			} 
-		} 
-
-		//----------- 6th Successor (North-West) ------------ 
-
-		if (isValid (i-1, j-1, H, W) == true) {  
-			if (isDestination (i-1, j-1, dest) == true) { 
-				cellDetails[i-1][j-1].parent_i = i; 
-				cellDetails[i-1][j-1].parent_j = j; 
-				tracePath (cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			}
-			else if (closedList[i-1][j-1] == false && isUnBlocked(grid, i-1, j-1) == true) { 
-				gNew = cellDetails[i][j].g + 1.414; 
-				hNew = calculateHValue(i-1, j-1, dest); 
-				fNew = gNew + hNew;  
-				if (cellDetails[i-1][j-1].f == FLT_MAX || cellDetails[i-1][j-1].f > fNew) { 
-					openList.insert( make_pair (fNew, make_pair (i-1, j-1))); 
-					cellDetails[i-1][j-1].f = fNew; 
-					cellDetails[i-1][j-1].g = gNew; 
-					cellDetails[i-1][j-1].h = hNew; 
-					cellDetails[i-1][j-1].parent_i = i; 
-					cellDetails[i-1][j-1].parent_j = j; 
-				} 
-			} 
-		} 
-
-		//----------- 7th Successor (South-East) ------------ 
-
-		if (isValid(i+1, j+1, H, W) == true) { 
-			if (isDestination(i+1, j+1, dest) == true) { 
-				cellDetails[i+1][j+1].parent_i = i; 
-				cellDetails[i+1][j+1].parent_j = j;  
-				tracePath (cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i+1][j+1] == false && isUnBlocked(grid, i+1, j+1) == true) { 
-				gNew = cellDetails[i][j].g + 1.414; 
-				hNew = calculateHValue(i+1, j+1, dest); 
-				fNew = gNew + hNew; 
-				if (cellDetails[i+1][j+1].f == FLT_MAX || cellDetails[i+1][j+1].f > fNew) { 
-					openList.insert(make_pair(fNew, make_pair (i+1, j+1)));
-					cellDetails[i+1][j+1].f = fNew; 
-					cellDetails[i+1][j+1].g = gNew; 
-					cellDetails[i+1][j+1].h = hNew; 
-					cellDetails[i+1][j+1].parent_i = i; 
-					cellDetails[i+1][j+1].parent_j = j; 
-				} 
-			} 
-		} 
-
-		//----------- 8th Successor (South-West) ------------ 
-
-		if (isValid (i+1, j-1, H, W) == true) { 
-			if (isDestination(i+1, j-1, dest) == true) { 
-				cellDetails[i+1][j-1].parent_i = i; 
-				cellDetails[i+1][j-1].parent_j = j;  
-				tracePath(cellDetails, dest, sol); 
-				foundDest = true; 
-				return; 
-			} 
-			else if (closedList[i+1][j-1] == false && (grid, i+1, j-1) == true) { 
-				gNew = cellDetails[i][j].g + 1.414; 
-				hNew = calculateHValue(i+1, j-1, dest); 
-				fNew = gNew + hNew; 
-				if (cellDetails[i+1][j-1].f == FLT_MAX || cellDetails[i+1][j-1].f > fNew) { 
-					openList.insert(make_pair(fNew, make_pair(i+1, j-1)));
-					cellDetails[i+1][j-1].f = fNew; 
-					cellDetails[i+1][j-1].g = gNew; 
-					cellDetails[i+1][j-1].h = hNew; 
-					cellDetails[i+1][j-1].parent_i = i; 
-					cellDetails[i+1][j-1].parent_j = j; 
-				} 
-			} 
-		} 
-	} 
-	if (foundDest == false) 
-		printf("Failed to find the Destination Cell, I guess there is no possible path!!"); 
-
-	return; 
-} 
-
-int main() 
-{ 	
+int main(){
+    srand(time(NULL));	
 	vector<Pair> solution_path;
-	fstream map;
+	fstream maps;
 	fstream position;
 	ofstream myfile;
 	string Xdimension, Ydimension, filename1, filename2;
-	filename1 = "map.txt";
+	filename1 = "maps.txt";
 	filename2 = "position.txt";
-	map.open(filename1.c_str());
+	maps.open(filename1.c_str());
 	position.open(filename2.c_str());
 	
-	map >> Xdimension;
-	map >> Ydimension;
+	maps >> Xdimension;
+	maps >> Ydimension;
 	int height = stoi(Xdimension);
 	int width = stoi(Ydimension);
  
@@ -382,11 +237,11 @@ int main()
 	position>>dx;
 	position>>dy;
 
-	int grid[ROW][COL];
+	int map[ROW][COL];
 	int inp_count = 0;
 	for(int i=0;i<height;i++){
 		for(int j=0;j<width;j++){
-				if(map >> grid[i][j]){
+				if(maps >> map[i][j]){
 					inp_count++;	
 				}else{
 					break;
@@ -402,7 +257,9 @@ int main()
 		
 		Pair src = make_pair(sx, sy); 
 		Pair dest = make_pair(dx, dy);
-		aStarSearch(grid, height, width, src, dest, &solution_path);
+		// aStarSearch(grid, height, width, src, dest, &solution_path);
+		pathFind(sx, sy, dx, dy, &solution_path);
+
 		cout<<endl;
 		myfile.open ("solution.txt");
   		for(int k=0; k<solution_path.size(); k++){
@@ -416,5 +273,61 @@ int main()
 		myfile.close();
 	}
 	
-	return(0); 
+
+    // fillout the map matrix with a '+' pattern
+    // for(int x=ROW/8;x<ROW*7/8;x++)
+    // {
+    //     map[x][COL/2]=1;
+    // }
+    // for(int y=COL/8;y<COL*7/8;y++)
+    // {
+    //     map[ROW/2][y]=1;
+    // }
+    
+    
+
+    // cout<<"Map Size (X,Y): "<<ROW<<","<<COL<<endl;
+    // cout<<"Start: "<<xA<<","<<yA<<endl;
+    // cout<<"Finish: "<<xB<<","<<yB<<endl;
+    // get the route
+    // clock_t start = clock();
+    // string route=pathFind(xA, yA, xB, yB);
+    // cout<<route<<endl<<endl;
+
+    // follow the route on the map and display it 
+    // if(route.length()>0)
+    // {
+    //     int j; char c;
+    //     int x=xA;
+    //     int y=yA;
+    //     map[x][y]=2;
+    //     for(int i=0;i<route.length();i++)
+    //     {
+    //         c =route.at(i);
+    //         j=atoi(&c); 
+    //         x=x+dx[j];
+    //         y=y+dy[j];
+    //         map[x][y]=3;
+    //     }
+    //     map[x][y]=4;
+    
+    //     // // display the map with the route
+    //     // for(int y=0;y<COL;y++)
+    //     // {
+    //     //     for(int x=0;x<ROW;x++)
+    //     //         if(map[x][y]==0)
+    //     //             cout<<".";
+    //     //         else if(map[x][y]==1)
+    //     //             cout<<"O"; //obstacle
+    //     //         else if(map[x][y]==2)
+    //     //             cout<<"S"; //start
+    //     //         else if(map[x][y]==3)
+    //     //             cout<<"R"; //route
+    //     //         else if(map[x][y]==4)
+    //     //             cout<<"F"; //finish
+    //     //     cout<<endl;
+    //     // }
+    // }
+    // getchar(); // wait for a (Enter) keypress  
+    return(0);
 }
