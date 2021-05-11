@@ -92,7 +92,7 @@ bool operator<(const node & a, const node & b)
   return a.getPriority() > b.getPriority();
 }
 
-string pathFind( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, vector<Pair> *sol)
+string pathFind( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish)
 {
     static priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
     static int pqi; // pq index
@@ -150,7 +150,6 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
                 y+=dy[j];
                 check[x][y].parent_i = x;
                 check[x][y].parent_j = y;
-                tracePath(check,dest,sol);
             }
 
             delete n0;
@@ -219,7 +218,8 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 
 int main(){
     srand(time(NULL));	
-	vector<Pair> solution_path;
+	vector<int> solution_path_x;
+	vector<int> solution_path_y;
 	fstream maps;
 	fstream position;
 	ofstream myfile;
@@ -234,11 +234,11 @@ int main(){
 	int height = stoi(Xdimension);
 	int width = stoi(Ydimension);
  
-	int sx,sy,dx,dy;
-	position>>sx;
-	position>>sy;
-	position>>dx;
-	position>>dy;
+	int start_x,start_y,dest_x,dest_y;
+	position>>start_x;
+	position>>start_y;
+	position>>dest_x;
+	position>>dest_y;
 
 	int map[ROW][COL];
 	int inp_count = 0;
@@ -251,28 +251,81 @@ int main(){
 				}
 		}
 	}
-
+	int x=0;
+	int y=0;
 	if(inp_count < height*width){
 		cout<<"There is some problem with the input file"<<endl;
 	}
 	else{
 		cout<<"Your map is perfect"<<endl;
 		
-		Pair src = make_pair(sx, sy); 
-		Pair dest = make_pair(dx, dy);
+		Pair src = make_pair(start_x, start_y); 
+		Pair dest = make_pair(dest_x, dest_y);
 		// aStarSearch(grid, height, width, src, dest, &solution_path);
-		pathFind(sx, sy, dx, dy, &solution_path);
-
+		string route = pathFind(start_x, start_y, dest_x, dest_y);
+		cout<< route;
 		cout<<endl;
+		cout<<"hello world";
+		cout<<endl;
+		if(route.length()>0){
+	        int j; char c;
+	        x=start_x;
+	        y=start_y;
+	        // map[x][y]=2;
+	        for(int i=0;i<route.length();i++)
+	        {
+	            c =route.at(i);
+	            j=atoi(&c); 
+	            x=x+dx[j];
+	            y=y+dy[j];
+	            map[x][y]=2;
+	        }
+	        // map[x][y]=4;
+	    
+	        // // display the map with the route
+	        // for(int y=0;y<COL;y++)
+	        // {
+	        //     for(int x=0;x<ROW;x++)
+	        //         if(map[x][y]==0)
+	        //             cout<<".";
+	        //         else if(map[x][y]==1)
+	        //             cout<<"O"; //obstacle
+	        //         else if(map[x][y]==2)
+	        //             cout<<"S"; //start
+	        //         else if(map[x][y]==3)
+	        //             cout<<"R"; //route
+	        //         else if(map[x][y]==4)
+	        //             cout<<"F"; //finish
+	        //     cout<<endl;
+	        // }
+	    }
+	    
+	    for (int i=0;i<ROW;i++){
+	    	for (int j=0; j<COL;j++){
+	    		cout<<map[x][y];
+	    	}
+	    }
+
 		myfile.open ("solution.txt");
-  		for(int k=0; k<solution_path.size(); k++){
-			myfile <<solution_path[k].first<<" ";
+		for (int i=0; i<ROW; i++){
+			for(int j=0; j<COL; j++){
+				if (map[x][y]==2){
+					solution_path_x.push_back(x);
+					solution_path_y.push_back(y);
+				}
+			}
 		}
-		myfile << "\n";
-		for(int k=0; k<solution_path.size(); k++){
-			myfile <<solution_path[k].second<<" ";
+  		for(int k=0; k<solution_path_x.size(); k++){
+  			// cout<<solution_path_x[k]<<" ";
+			// myfile <<solution_path_x[k]<<" ";
 		}
-		myfile << "\n";
+		// myfile << "\n";
+		for(int k=0; k<solution_path_y.size(); k++){
+			// cout<<solution_path_y[k]<<" ";
+			// myfile <<solution_path_y[k]<<" ";
+		}
+		// myfile << "\n";
+
 		myfile.close();
 	}
 	
@@ -298,39 +351,6 @@ int main(){
     // cout<<route<<endl<<endl;
 
     // follow the route on the map and display it 
-    // if(route.length()>0)
-    // {
-    //     int j; char c;
-    //     int x=xA;
-    //     int y=yA;
-    //     map[x][y]=2;
-    //     for(int i=0;i<route.length();i++)
-    //     {
-    //         c =route.at(i);
-    //         j=atoi(&c); 
-    //         x=x+dx[j];
-    //         y=y+dy[j];
-    //         map[x][y]=3;
-    //     }
-    //     map[x][y]=4;
-    
-    //     // // display the map with the route
-    //     // for(int y=0;y<COL;y++)
-    //     // {
-    //     //     for(int x=0;x<ROW;x++)
-    //     //         if(map[x][y]==0)
-    //     //             cout<<".";
-    //     //         else if(map[x][y]==1)
-    //     //             cout<<"O"; //obstacle
-    //     //         else if(map[x][y]==2)
-    //     //             cout<<"S"; //start
-    //     //         else if(map[x][y]==3)
-    //     //             cout<<"R"; //route
-    //     //         else if(map[x][y]==4)
-    //     //             cout<<"F"; //finish
-    //     //     cout<<endl;
-    //     // }
-    // }
     // getchar(); // wait for a (Enter) keypress  
     return(0);
 }
