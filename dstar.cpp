@@ -144,12 +144,16 @@ void UpdateVertex(vertex u)
 
     if (!isVertexEqual(u, s_goal))
     {
-        double c1, c2, c3, c4;
+        double c1, c2, c3, c4, c5, c6, c7, c8;
 
-        c1 = g[u.x][u.y + 1] + 1 + GRID[u.x][u.y + 1] * Inf;
-        c2 = g[u.x + 1][u.y] + 1 + GRID[u.x + 1][u.y] * Inf;
-        c3 = g[u.x][u.y - 1] + 1 + GRID[u.x][u.y - 1] * Inf;
-        c4 = g[u.x - 1][u.y] + 1 + GRID[u.x - 1][u.y] * Inf;
+        c1 = g[u.x][u.y + 1] + 1 + GRID[u.x][u.y + 1] * Inf;         //N
+        c2 = g[u.x + 1][u.y] + 1 + GRID[u.x + 1][u.y] * Inf;         //E
+        c3 = g[u.x][u.y - 1] + 1 + GRID[u.x][u.y - 1] * Inf;         //S
+        c4 = g[u.x - 1][u.y] + 1 + GRID[u.x - 1][u.y] * Inf;         //W
+        c5 = g[u.x + 1][u.y + 1] + 1 + GRID[u.x + 1][u.y + 1] * Inf; //NE
+        c6 = g[u.x - 1][u.y + 1] + 1 + GRID[u.x - 1][u.y + 1] * Inf; //NW
+        c7 = g[u.x + 1][u.y - 1] + 1 + GRID[u.x + 1][u.y - 1] * Inf; //SE
+        c8 = g[u.x - 1][u.y - 1] + 1 + GRID[u.x - 1][u.y - 1] * Inf; //SW
 
         if (u.y + 1 > grid_s_y || GRID[u.x][u.y + 1] == 1)
             c1 = Inf;
@@ -159,8 +163,16 @@ void UpdateVertex(vertex u)
             c3 = Inf;
         if (u.x - 1 < 0 || GRID[u.x - 1][u.y] == 1)
             c4 = Inf;
+        if (u.x + 1 > grid_s_x || u.y + 1 > grid_s_y || GRID[u.x + 1][u.y + 1] == 1)
+            c5 = Inf;
+        if (u.x - 1 < 0 || u.y + 1 > grid_s_y || GRID[u.x - 1][u.y + 1] == 1)
+            c6 = Inf;
+        if (u.x + 1 > grid_s_x || u.y - 1 < 0 || GRID[u.x + 1][u.y - 1] == 1)
+            c7 = Inf;
+        if (u.x - 1 < 0 || u.y - 1 < 0 || GRID[u.x - 1][u.y - 1] == 1)
+            c8 = Inf;
 
-        rhs[u.x][u.y] = min(min(c3, c4), min(c1, c2));
+        rhs[u.x][u.y] = min(min(min(c1, c2), min(c3, c4)), min(min(c5, c6), min(c7, c8)));
     }
     u = CalculateKey(u);
     if (isInQueue(u))
@@ -232,6 +244,10 @@ void ComputeShortestPath()
             UpdateVertex(vertex(u.x + 1, u.y, 0, 0));
             UpdateVertex(vertex(u.x, u.y - 1, 0, 0));
             UpdateVertex(vertex(u.x - 1, u.y, 0, 0));
+            UpdateVertex(vertex(u.x + 1, u.y + 1, 0, 0));
+            UpdateVertex(vertex(u.x + 1, u.y - 1, 0, 0));
+            UpdateVertex(vertex(u.x - 1, u.y + 1, 0, 0));
+            UpdateVertex(vertex(u.x - 1, u.y + 1, 0, 0));
         }
         else
         {
@@ -244,6 +260,10 @@ void ComputeShortestPath()
             UpdateVertex(vertex(u.x + 1, u.y, 0, 0));
             UpdateVertex(vertex(u.x, u.y - 1, 0, 0));
             UpdateVertex(vertex(u.x - 1, u.y, 0, 0));
+            UpdateVertex(vertex(u.x + 1, u.y + 1, 0, 0));
+            UpdateVertex(vertex(u.x + 1, u.y - 1, 0, 0));
+            UpdateVertex(vertex(u.x - 1, u.y + 1, 0, 0));
+            UpdateVertex(vertex(u.x - 1, u.y + 1, 0, 0));
         }
     }
 }
