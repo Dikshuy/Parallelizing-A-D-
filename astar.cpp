@@ -7,18 +7,18 @@
 
 using namespace std; 
 
-#define ROW 50
-#define COL 50
+#define ROW 6
+#define COL 6
 
 typedef pair<int, int> Pair; 
 static int maps[ROW][COL];
 static int closed_nodes_map[ROW][COL]; // map of closed (tried-out) nodes
 static int open_nodes_map[ROW][COL]; // map of open (not-yet-tried) nodes
 static int dir_map[ROW][COL]; // map of directions
-const int dir=8; // number of possible directions to go at any position
-static int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
-static int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
-
+const int dir=4; // number of possible directions to go at any position
+static int dx[dir]={1, 0, -1, 0};
+static int dy[dir]={0, 1, 0, -1};
+//0 is down, 3 is left, 1 is right, 2 is up
 struct cell {
 	int parent_i, parent_j; 
 }; 
@@ -74,7 +74,7 @@ class node
 
         void nextLevel(const int & i) 
         {
-             level+=(dir==8?(i%2==0?10:14):10);
+             level+=10;
         }
         
         const int & estimate(const int & xDest, const int & yDest) const
@@ -217,57 +217,124 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 }
 
 int main(){
-    srand(time(NULL));	
+      
+  time_t t;
+  srand(time(NULL));	
 	vector<int> solution_path_x;
 	vector<int> solution_path_y;
-	fstream maps;
+//fstream maps;
 	fstream position;
 	ofstream myfile;
 	string Xdimension, Ydimension, filename1, filename2;
-	filename1 = "map.txt";
-	filename2 = "position.txt";
-	maps.open(filename1.c_str());
-	position.open(filename2.c_str());
+//	filename1 = "map.txt";
+//	filename2 = "position.txt";
+//	maps.open(filename1.c_str());
+//	position.open(filename2.c_str());
 	
-	maps >> Xdimension;
-	maps >> Ydimension;
-	int height = stoi(Xdimension);
-	int width = stoi(Ydimension);
+//	maps >> Xdimension;
+//	maps >> Ydimension;
+//	int height = stoi(Xdimension);
+//	int width = stoi(Ydimension);
  
-	int start_x,start_y,dest_x,dest_y;
-	position>>start_x;
-	position>>start_y;
-	position>>dest_x;
-	position>>dest_y;
+	
+//	position>>start_x;
+//	position>>start_y;
+//	position>>dest_x;
+//	position>>dest_y;
 
-	int map[ROW][COL];
-	int inp_count = 0;
-	for(int i=0;i<height;i++){
-		for(int j=0;j<width;j++){
-				if(maps >> map[i][j]){
-					inp_count++;	
-				}else{
-					break;
-				}
-		}
+//	int map[ROW][COL];
+//	int inp_count = 0;
+  
+//	for(int i=0;i<height;i++){
+//		for(int j=0;j<width;j++){
+//				if(maps >> map[i][j]){
+//					inp_count++;	
+//				}else{
+//					break;
+//				}
+//		}
+//	}
+int x=0;
+int y=0;
+//	if(inp_count < height*width){
+//		cout<<"There is some problem with the input file"<<endl;
+//	}
+//	else
+//		cout<<"Your map is perfect"<<endl;
+
+
+
+int dim = 6;
+  int map[ROW][COL];
+	int *results = (int *) malloc(dim * dim * sizeof(int));
+  srand((unsigned) time(&t));
+	double p = 0.5;
+
+	for (int i = 0; i < dim; i++){
+      for(int j=0;j<dim; j++)
+      {
+		map[i][j] = p < (double)rand()/(double)(RAND_MAX);
+		
 	}
-	int x=0;
-	int y=0;
-	if(inp_count < height*width){
-		cout<<"There is some problem with the input file"<<endl;
+  }
+
+  for (int i=0;i<dim;i++){
+	    	for (int j=0; j<dim;j++){
+	    		cout<<map[i][j]<<" ";
+	    	}
+        cout<<endl;
+	    }
+
+      cout<<"Meow";
+      cout<<endl;
+
+  //# print_board(map, dim);	
+	//1s are spaces you can walk on
+
+  int start_x=0,start_y=0,dest_x=0,dest_y=0;
+	int startPoint = -1;
+	while (startPoint == -1){
+		int rand1 = rand() % dim;
+    int rand2 = rand() % dim;
+		if (map[rand1][rand2] == 1)
+			start_x= rand1;
+      start_y= rand2;
+      startPoint=start_x*dim+start_y;
+      cout<<endl<<"Hi_Start_Point_Here"<<start_x<<" "<<start_y<<" "<<startPoint<<endl;
+      	}
+	
+	int endPoint = -1;
+	while (endPoint == -1){
+		int rand1 = rand() % dim;
+    int rand2 = rand() % dim;
+		if (map[rand1][rand2] == 1)
+			dest_x= rand1;
+      dest_y= rand2;
+      endPoint=dest_x*dim+dest_y;
+      if(endPoint==startPoint) {endPoint=-1;}
+       cout<<endl<<"Hi_End_Point_Here "<<endPoint<<endl;
+		
 	}
-	else{
-		cout<<"Your map is perfect"<<endl;
+
+  cout<<start_x<<" "<<start_y;
+  cout<<endl;
+  cout<<dest_x<<" "<<dest_y;
+  cout<<endl;
 		
 		Pair src = make_pair(start_x, start_y); 
 		Pair dest = make_pair(dest_x, dest_y);
 		// aStarSearch(grid, height, width, src, dest, &solution_path);
 		string route = pathFind(start_x, start_y, dest_x, dest_y);
+		cout<<"**************************************";
 		cout<< route;
+		cout<<"**************************************";
+    //cout<<"Meow";
 		cout<<endl;
 		cout<<"hello world";
 		cout<<endl;
 		if(route.length()>0){
+      cout<<"hello world  from if"<<endl;
+
 	        int j; char c;
 	        x=start_x;
 	        y=start_y;
@@ -302,8 +369,9 @@ int main(){
 	    
 	    for (int i=0;i<ROW;i++){
 	    	for (int j=0; j<COL;j++){
-	    		cout<<map[x][y];
+	    		cout<<map[i][j]<<" ";
 	    	}
+        cout<<endl;
 	    }
 
 		myfile.open ("solution.txt");
@@ -327,15 +395,15 @@ int main(){
 		// myfile << "\n";
 
 		myfile.close();
-	}
+	
 	
 
     // fillout the map matrix with a '+' pattern
-    // for(int x=ROW/8;x<ROW*7/8;x++)
+    // for(int x=ROW/4;x<ROW*3/4;x++)
     // {
     //     map[x][COL/2]=1;
     // }
-    // for(int y=COL/8;y<COL*7/8;y++)
+    // for(int y=COL/4;y<COL*3/4;y++)
     // {
     //     map[ROW/2][y]=1;
     // }
@@ -351,6 +419,9 @@ int main(){
     // cout<<route<<endl<<endl;
 
     // follow the route on the map and display it 
-    // getchar(); // wait for a (Enter) keypress  
-    return(0);
+    // getchar(); 
+    // wait for a (Enter) keypress 
+
+ 
+    return 0;
 }
