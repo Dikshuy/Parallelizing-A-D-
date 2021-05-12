@@ -15,39 +15,41 @@ static int maps[ROW][COL];
 static int closed_nodes_map[ROW][COL]; // map of closed (tried-out) nodes
 static int open_nodes_map[ROW][COL]; // map of open (not-yet-tried) nodes
 static int dir_map[ROW][COL]; // map of directions
-const int dir=4; // number of possible directions to go at any position
-static int dx[dir]={1, 0, -1, 0};
-static int dy[dir]={0, 1, 0, -1};
-//0 is down, 3 is left, 1 is right, 2 is up
-struct cell {
-	int parent_i, parent_j; 
-}; 
+const int dir=8; // number of possible directions to go at any position
+// static int dx[dir]={1, 0, -1, 0};
+// static int dy[dir]={0, 1, 0, -1};
+static int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
+static int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
+//0 is down, 1 is right, 2 is up, 3 is left
+// struct cell {
+// 	int parent_i, parent_j; 
+// }; 
 
-void tracePath(cell cellDetails[][COL], Pair dest, vector<Pair> *solvec) { 
-	printf ("optmial path Found :)"); 
-	int row = dest.first; 
-	int col = dest.second; 
+// void tracePath(cell cellDetails[][COL], Pair dest, vector<Pair> *solvec) { 
+// 	printf ("optmial path Found :)"); 
+// 	int row = dest.first; 
+// 	int col = dest.second; 
 
-	stack<Pair> Path; 
+// 	stack<Pair> Path; 
 
-	while (!(cellDetails[row][col].parent_i == row && cellDetails[row][col].parent_j == col )) { 
-		Path.push(make_pair (row, col)); 
-		int temp_row = cellDetails[row][col].parent_i; 
-		int temp_col = cellDetails[row][col].parent_j; 
-		row = temp_row; 
-		col = temp_col; 
-	} 
+// 	while (!(cellDetails[row][col].parent_i == row && cellDetails[row][col].parent_j == col )) { 
+// 		Path.push(make_pair (row, col)); 
+// 		int temp_row = cellDetails[row][col].parent_i; 
+// 		int temp_col = cellDetails[row][col].parent_j; 
+// 		row = temp_row; 
+// 		col = temp_col; 
+// 	} 
 
-	Path.push (make_pair (row, col)); 
-	while (!Path.empty()) 
-	{ 
-		Pair p = Path.top(); 
-		Path.pop();
-		solvec->push_back(p);
-	} 
+// 	Path.push (make_pair (row, col)); 
+// 	while (!Path.empty()) 
+// 	{ 
+// 		Pair p = Path.top(); 
+// 		Path.pop();
+// 		solvec->push_back(p);
+// 	} 
 
-	return; 
-} 
+// 	return; 
+// } 
 
 class node
 {
@@ -74,7 +76,8 @@ class node
 
         void nextLevel(const int & i) 
         {
-             level+=10;
+            level+=(dir==8?(i%2==0?10:14):10);
+            // level=10;
         }
         
         const int & estimate(const int & xDest, const int & yDest) const
@@ -101,7 +104,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
     static int i, j, x, y, xdx, ydy;
     static char c;
     pqi=0;
-    Pair dest = make_pair(*dx, *dy);
+    // Pair dest = make_pair(*dx, *dy);
 
     // reset the node maps
     for(y=0;y<COL;y++)
@@ -135,7 +138,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 
         // quit searching when the goal state is reached
         //if((*n0).estimate(xFinish, yFinish) == 0)
-        cell check[ROW][COL];
+        // cell check[ROW][COL];
         if(x==xFinish && y==yFinish) 
         {
             // generate the path from finish to start
@@ -148,8 +151,8 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
                 path=c+path;
                 x+=dx[j];
                 y+=dy[j];
-                check[x][y].parent_i = x;
-                check[x][y].parent_j = y;
+                // check[x][y].parent_i = x;
+                // check[x][y].parent_j = y;
             }
 
             delete n0;
@@ -218,51 +221,61 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 
 int main(){
       
-  time_t t;
-  srand(time(NULL));	
-	vector<int> solution_path_x;
-	vector<int> solution_path_y;
-//fstream maps;
-	fstream position;
-	ofstream myfile;
-	string Xdimension, Ydimension, filename1, filename2;
-//	filename1 = "map.txt";
-//	filename2 = "position.txt";
-//	maps.open(filename1.c_str());
-//	position.open(filename2.c_str());
+    time_t t;
+    srand(time(NULL));	
+ //    int start_x=0;
+ //    int start_y=0;
+ //    int dest_x=0;
+ //    int dest_y=0;
+	// vector<int> solution_path_x;
+	// vector<int> solution_path_y;
+	// fstream maps;
+	// fstream position;
+	// ofstream myfile;
+	// string Xdimension, Ydimension, filename1, filename2;
+	// filename1 = "map.txt";
+	// filename2 = "position.txt";
+	// maps.open(filename1.c_str());
+	// position.open(filename2.c_str());
 	
-//	maps >> Xdimension;
-//	maps >> Ydimension;
-//	int height = stoi(Xdimension);
-//	int width = stoi(Ydimension);
+	// maps >> Xdimension;
+	// maps >> Ydimension;
+	// int height = stoi(Xdimension);
+	// int width = stoi(Ydimension);
  
 	
-//	position>>start_x;
-//	position>>start_y;
-//	position>>dest_x;
-//	position>>dest_y;
+	// position>>start_x;
+	// position>>start_y;
+	// position>>dest_x;
+	// position>>dest_y;
 
-//	int map[ROW][COL];
-//	int inp_count = 0;
+	// int map[height][width];
+	// int inp_count = 0;
   
-//	for(int i=0;i<height;i++){
-//		for(int j=0;j<width;j++){
-//				if(maps >> map[i][j]){
-//					inp_count++;	
-//				}else{
-//					break;
-//				}
-//		}
-//	}
+	// for(int i=0;i<height;i++){
+	// 	for(int j=0;j<width;j++){
+	// 			if(maps >> map[i][j]){
+	// 				inp_count++;	
+	// 			}else{
+	// 				break;
+	// 			}
+	// 	}
+	// }
 int x=0;
 int y=0;
-//	if(inp_count < height*width){
-//		cout<<"There is some problem with the input file"<<endl;
-//	}
-//	else
-//		cout<<"Your map is perfect"<<endl;
+	// if(inp_count < height*width){
+	// 	cout<<"There is some problem with the input file"<<endl;
+	// }
+	// else
+	// 	cout<<"Your map is perfect"<<endl;
 
-
+	// for(int i=0;i<height;i++){
+	// 	for(int j=0;j<width;j++){
+	// 		cout<<map[i][j]<<" ";
+	// 	}
+	// 	cout<<endl;
+	// }
+	// cout<<endl;
 
 int dim = 6;
   int map[ROW][COL];
@@ -316,9 +329,9 @@ int dim = 6;
 		
 	}
 
-  cout<<start_x<<" "<<start_y;
+  cout<<"starting coordinates: "<<start_x<<" "<<start_y;
   cout<<endl;
-  cout<<dest_x<<" "<<dest_y;
+  cout<<"destination coordinates"<<dest_x<<" "<<dest_y;
   cout<<endl;
 		
 		Pair src = make_pair(start_x, start_y); 
@@ -347,7 +360,7 @@ int dim = 6;
 	            y=y+dy[j];
 	            map[x][y]=2;
 	        }
-	        // map[x][y]=4;
+	        // map[x][y]=2;
 	    
 	        // // display the map with the route
 	        // for(int y=0;y<COL;y++)
@@ -366,7 +379,7 @@ int dim = 6;
 	        //     cout<<endl;
 	        // }
 	    }
-	    
+
 	    for (int i=0;i<ROW;i++){
 	    	for (int j=0; j<COL;j++){
 	    		cout<<map[i][j]<<" ";
@@ -374,27 +387,29 @@ int dim = 6;
         cout<<endl;
 	    }
 
-		myfile.open ("solution.txt");
-		for (int i=0; i<ROW; i++){
-			for(int j=0; j<COL; j++){
-				if (map[x][y]==2){
-					solution_path_x.push_back(x);
-					solution_path_y.push_back(y);
-				}
-			}
-		}
-  		for(int k=0; k<solution_path_x.size(); k++){
-  			// cout<<solution_path_x[k]<<" ";
-			// myfile <<solution_path_x[k]<<" ";
-		}
+		// myfile.open ("solution.txt");
+		// // cout<<"lol"<<endl;
+		// for (int i=0; i<height; i++){
+		// 	for(int j=0; j<width; j++){
+		// 		if (map[i][j]==2){
+		// 			solution_path_x.push_back(i);
+		// 			solution_path_y.push_back(j);
+		// 		}
+		// 	}
+		// }
+  // 		for(int k=0; k<solution_path_x.size(); k++){
+  // 			// cout<<solution_path_x[k]<<" ";
+		// 	myfile <<solution_path_x[k]<<" ";
+		// }
+		// cout<<endl;
 		// myfile << "\n";
-		for(int k=0; k<solution_path_y.size(); k++){
-			// cout<<solution_path_y[k]<<" ";
-			// myfile <<solution_path_y[k]<<" ";
-		}
+		// for(int k=0; k<solution_path_y.size(); k++){
+		// 	// cout<<solution_path_y[k]<<" ";
+		// 	myfile <<solution_path_y[k]<<" ";
+		// }
 		// myfile << "\n";
-
-		myfile.close();
+		// cout<<endl;
+		// myfile.close();
 	
 	
 
