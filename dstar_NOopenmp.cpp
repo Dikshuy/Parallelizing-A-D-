@@ -19,7 +19,7 @@ struct vertex
 };
 vertex::vertex(int p_x, int p_y, float p_k1, float p_k2) : x{p_x}, y{p_y}, k1{p_k1}, k2{p_k2} {}
 //Goal & start
-vertex s_goal(2, 4, 0, 0);
+vertex s_goal(10, 4, 0, 0);
 vertex s_start(0, 0, 0, 0);
 int km = 0;
 
@@ -144,23 +144,28 @@ void UpdateVertex(vertex u)
 
     if (!isVertexEqual(u, s_goal))
     {
-        double c1, c2, c3, c4, c5, c6, c7, c8;
-
-        c1 = g[u.x][u.y + 1] + 1 + GRID[u.x][u.y + 1] * Inf; //N
-        c2 = g[u.x + 1][u.y] + 1 + GRID[u.x + 1][u.y] * Inf; //E
-        c3 = g[u.x][u.y - 1] + 1 + GRID[u.x][u.y - 1] * Inf; //S
-        c4 = g[u.x - 1][u.y] + 1 + GRID[u.x - 1][u.y] * Inf; //W
+        double c[3][3];
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (abs(i) != abs(j))
+                {
+                    c[i + 1][j + 1] = g[u.x + i][u.y + j] + 1 + GRID[u.x + i][u.y + j];
+                }
+            }
+        }
 
         if (u.y + 1 > grid_s_y || GRID[u.x][u.y + 1] == 1)
-            c1 = Inf;
+            c[1][2] = Inf;
         if (u.x + 1 > grid_s_x || GRID[u.x + 1][u.y] == 1)
-            c2 = Inf;
+            c[2][1] = Inf;
         if (u.y - 1 < 0 || GRID[u.x][u.y - 1] == 1)
-            c3 = Inf;
+            c[1][0] = Inf;
         if (u.x - 1 < 0 || GRID[u.x - 1][u.y] == 1)
-            c4 = Inf;
+            c[0][1] = Inf;
 
-        rhs[u.x][u.y] = min(min(c1, c2), min(c3, c4));
+        rhs[u.x][u.y] = min(min(c[1][2], c[2][1]), min(c[1][0], c[0][1]));
     }
     u = CalculateKey(u);
     if (isInQueue(u))
@@ -228,29 +233,40 @@ void ComputeShortestPath()
         {
             g[u.x][u.y] = rhs[u.x][u.y];
             cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
-            UpdateVertex(vertex(u.x, u.y + 1, 0, 0));
-            UpdateVertex(vertex(u.x + 1, u.y, 0, 0));
-            UpdateVertex(vertex(u.x, u.y - 1, 0, 0));
-            UpdateVertex(vertex(u.x - 1, u.y, 0, 0));
+
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (abs(i) != abs(j))
+                    {
+                        UpdateVertex(vertex(u.x + i, u.y + j, 0, 0));
+                    }
+                }
+            }
         }
         else
         {
             g[u.x][u.y] = Inf;
             cout << " => else" << endl;
 
-            UpdateVertex(vertex(u.x, u.y, 0, 0));
-
-            UpdateVertex(vertex(u.x, u.y + 1, 0, 0));
-            UpdateVertex(vertex(u.x + 1, u.y, 0, 0));
-            UpdateVertex(vertex(u.x, u.y - 1, 0, 0));
-            UpdateVertex(vertex(u.x - 1, u.y, 0, 0));
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (abs(i) != abs(j) || (i == 0 && j == 0))
+                    {
+                        UpdateVertex(vertex(u.x + i, u.y + j, 0, 0));
+                    }
+                }
+            }
         }
     }
 }
 void fillGRID()
 {
     string line;
-    ifstream textfile("map2.txt");
+    ifstream textfile("in.in");
 
     int i = 0;
     while (getline(textfile, line))
@@ -309,29 +325,6 @@ int main()
         }
         cout << endl;
     }
-
-    /*
-    vertex v2(1,0,800,40);
-    vertex v3(1,1,3,40  );
-    vertex v4(1,2,3,30  );
-   
-    pushToQueue(v2);
-    pushToQueue(v3);
-    pushToQueue(v4);
-  
-    
-    cout << "The priority queue U is : ";
-    showpq(U);
- 
-    cout << "\nU.size() : " << U.size();
-    cout << "\nU.top() : " << TopKey().x<< " , "<<TopKey().y;
- 
-    cout << "\nU.pop() : ";
-    pop();
-    showpq(U);
-    cout << "\nU.size() : " << U.size();
-    cout << "\nU.top() : " << TopKey().x<< " , "<<TopKey().y;
-    */
 
     return 0;
 }
