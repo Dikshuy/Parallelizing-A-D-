@@ -7,8 +7,8 @@
 
 using namespace std; 
 
-#define ROW 10
-#define COL 10
+#define ROW 60
+#define COL 60
 
 const int n=10; // horizontal size of the map
 const int m=10; // vertical size size of the map
@@ -20,7 +20,7 @@ const int dir=4; // number of possible directions to go at any position
 // if dir==4
 static int dx[dir]={1, 0, -1, 0};
 static int dy[dir]={0, 1, 0, -1};
-// // if dir==8
+// if dir==8
 // static int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
 // static int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
@@ -236,8 +236,7 @@ int main(){
 	position>>start_y;
 	position>>dest_x;
 	position>>dest_y;
-
-	int map[height][width];
+	
 	int inp_count = 0;
   
 	for(int i=0;i<height;i++){
@@ -249,92 +248,36 @@ int main(){
 				}
 		}
 	}
-	int x=0;
-	int y=0;
-
-	cout<<"************** generating map *************************"<<endl;
-	for(int i=0;i<height;i++){
-		for(int j=0;j<width;j++){
+	cout<<"************************* generated map *************************"<<endl;
+	for(int j=0;j<m;j++){
+		for(int i=0;i<n;i++){
 			cout<<map[i][j]<<" ";
 		}
 		cout<<endl;
 	}
 	cout<<endl;
-	cout<<"************** map generated *************************"<<endl;
-
-	if(inp_count < height*width){
+	
+	if(inp_count < n*m){
 		cout<<"There is some problem with the input file"<<endl;
 	}
 	else{
 		cout<<"Your map is perfect"<<endl;
-// int dim = 6;
-//   int map[ROW][COL];
-// 	int *results = (int *) malloc(dim * dim * sizeof(int));
-//   srand((unsigned) time(&t));
-// 	double p = 0.5;
-
-// 	for (int i = 0; i < dim; i++){
-//       for(int j=0;j<dim; j++)
-//       {
-// 		map[i][j] = p < (double)rand()/(double)(RAND_MAX);
-		
-// 	}
-//   }
-
-//   for (int i=0;i<dim;i++){
-// 	    	for (int j=0; j<dim;j++){
-// 	    		cout<<map[i][j]<<" ";
-// 	    	}
-//         cout<<endl;
-// 	    }
-
-     
-
-//   //# print_board(map, dim);	
-// 	//1s are spaces you can walk on
-
-//   int start_x=0,start_y=0,dest_x=0,dest_y=0;
-// 	int startPoint = -1;
-// 	while (startPoint == -1){
-// 		int rand1 = rand() % dim;
-//     int rand2 = rand() % dim;
-// 		if (map[rand1][rand2] == 1)
-// 			start_x= rand1;
-//       start_y= rand2;
-//       startPoint=start_x*dim+start_y;
-//       // cout<<endl<<"Hi_Start_Point_Here"<<start_x<<" "<<start_y<<" "<<startPoint<<endl;
-//       	}
-	
-// 	int endPoint = -1;
-// 	while (endPoint == -1){
-// 		int rand1 = rand() % dim;
-//     int rand2 = rand() % dim;
-// 		if (map[rand1][rand2] == 1)
-// 			dest_x= rand1;
-//       dest_y= rand2;
-//       endPoint=dest_x*dim+dest_y;
-//       if(endPoint==startPoint) {endPoint=-1;}
-//        // cout<<endl<<"Hi_End_Point_Here "<<endPoint<<endl;
-		
-// 	}
 
 		cout<<"starting coordinates: "<<start_x<<" "<<start_y;
 		cout<<endl;
 		cout<<"destination coordinates: "<<dest_x<<" "<<dest_y;
 		cout<<endl;
 
-		// aStarSearch(grid, height, width, src, dest, &solution_path);
 		string route = pathFind(start_x, start_y, dest_x, dest_y);
-		cout<<"**************************************";
+		cout<<"**************************************"<<endl;
 		cout<< route;
-		cout<<"**************************************";
+		cout<<"**************************************"<<endl;
 		cout<<endl;
 		if(route.length()>0){
-      // cout<<"hello world  from if"<<endl;
 	        int j; char c;
-	        x=start_x;
-	        y=start_y;
-	        // map[x][y]=2;
+	        int x=start_x;
+	        int y=start_y;
+	        map[x][y]=2;
 	        for(int i=0;i<route.length();i++)
 	        {
 	            c =route.at(i);
@@ -343,35 +286,17 @@ int main(){
 	            y=y+dy[j];
 	            map[x][y]=2;
 	        }
-	        // map[x][y]=2;
-	    
-	        // // display the map with the route
-	        // for(int y=0;y<COL;y++)
-	        // {
-	        //     for(int x=0;x<ROW;x++)
-	        //         if(map[x][y]==0)
-	        //             cout<<".";
-	        //         else if(map[x][y]==1)
-	        //             cout<<"O"; //obstacle
-	        //         else if(map[x][y]==2)
-	        //             cout<<"S"; //start
-	        //         else if(map[x][y]==3)
-	        //             cout<<"R"; //route
-	        //         else if(map[x][y]==4)
-	        //             cout<<"F"; //finish
-	        //     cout<<endl;
-	        // }
+	        map[x][y]=2;
 	    }
 
-	    for (int i=0;i<ROW;i++){
-	    	for (int j=0; j<COL;j++){
+	    for (int j=0;j<m;j++){
+	    	for (int i=0; i<n;i++){
 	    		cout<<map[i][j]<<" ";
 	    	}
         cout<<endl;
 	    }
 
 		myfile.open ("solution.txt");
-		// cout<<"lol"<<endl;
 		for (int i=0; i<height; i++){
 			for(int j=0; j<width; j++){
 				if (map[i][j]==2){
@@ -381,13 +306,13 @@ int main(){
 			}
 		}
   		for(int k=0; k<solution_path_x.size(); k++){
-  			// cout<<solution_path_x[k]<<" ";
+  			cout<<solution_path_x[k]<<" ";
 			myfile <<solution_path_x[k]<<" ";
 		}
 		cout<<endl;
 		myfile << "\n";
 		for(int k=0; k<solution_path_y.size(); k++){
-			// cout<<solution_path_y[k]<<" ";
+			cout<<solution_path_y[k]<<" ";
 			myfile <<solution_path_y[k]<<" ";
 		}
 		myfile << "\n";

@@ -53,8 +53,8 @@ def mapbuilder(grid):
 				column = pos[0] // (CELL_WIDTH + MARGIN)
 				row = pos[1] // (CELL_HEIGHT + MARGIN)
 				# Changing location value
-				if(grid[row][column]==1):
-					grid[row][column] = 0
+				if(grid[row][column]==0):
+					grid[row][column] = 1
 					pygame.draw.rect(screen,
             	                 RED,
                 	             [(MARGIN + CELL_WIDTH) * column + MARGIN,
@@ -62,7 +62,7 @@ def mapbuilder(grid):
                         	      CELL_WIDTH,
                             	  CELL_HEIGHT])
 				else:
-					grid[row][column] = 1
+					grid[row][column] = 0
 					pygame.draw.rect(screen,
             	                 WHITE,
                 	             [(MARGIN + CELL_WIDTH) * column + MARGIN,
@@ -154,7 +154,7 @@ for row in range(GRID_HEIGHT):
     # Add an empty array that will hold each cell in this row
     grid.append([])
     for column in range(GRID_WIDTH):
-        grid[row].append(1)  # Appending a cell
+        grid[row].append(0)  # Appending a cell
 
 
 # Initialize pygame
