@@ -2,6 +2,7 @@ import pygame
 import subprocess
 import time
 subprocess.call(["g++", "astar.cpp"])
+# subprocess.call(["g++", "astar_openmp.cpp"])
 
 # Defining some colors, cell dimensions, margin, temp
 BLACK = (0, 0, 0)

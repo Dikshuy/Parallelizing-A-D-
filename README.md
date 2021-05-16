@@ -1,5 +1,8 @@
 > course project of ME766
 # Parallelizing A-star algorithm
+
+For working on serial code:
+
 MODULE REQ:: \
   import pygame if it's not already there in your console(To import pygame for python3.... pip3 install pygame) \
  \
@@ -21,6 +24,7 @@ NOTE: \
   b)astar.cpp is executed within the graphics.py itself \
     map.txt and solution.txt will be updated at 5th and 6th steps respectively \
  \
+
 
 RESOURCES: \
 * https://arcade.academy/examples/array_backed_grid_sprites_2.html

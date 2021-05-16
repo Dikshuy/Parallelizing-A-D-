@@ -9,8 +9,8 @@
 
 using namespace std; 
 
-#define ROW 6
-#define COL 6
+#define ROW 100
+#define COL 100
 
 typedef pair<int, int> Pair; 
 static int maps[ROW][COL];
@@ -225,7 +225,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
 
 int main(){
 
-itime_t t;
+time_t t;
   srand(time(NULL));    
     vector<int> solution_path_x;
     vector<int> solution_path_y;
@@ -278,7 +278,6 @@ int dim = 6;
     double p = 0.5;
 
 
-    #pragma omp parallel for private(j)
     for (int i = 0; i < dim; i++){
       for(int j=0;j<dim; j++)
       {
