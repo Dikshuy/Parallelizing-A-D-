@@ -7,8 +7,8 @@
 
 using namespace std; 
 
-#define ROW 60
-#define COL 60
+#define ROW 200
+#define COL 200
 
 static int map[ROW][COL];
 static int closed_nodes_map[ROW][COL]; // map of closed (tried-out) nodes
