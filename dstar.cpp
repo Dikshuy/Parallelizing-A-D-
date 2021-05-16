@@ -19,13 +19,13 @@ struct vertex
 };
 vertex::vertex(int p_x, int p_y, float p_k1, float p_k2) : x{p_x}, y{p_y}, k1{p_k1}, k2{p_k2} {}
 //Goal & start
-vertex s_goal(26, 30, 0, 0);
+vertex s_goal(400, 400, 0, 0);
 vertex s_start(0, 0, 0, 0);
 int km = 0;
 
 //constraints
-#define grid_s_x 100
-#define grid_s_y 100
+#define grid_s_x 1000
+#define grid_s_y 1000
 
 double rhs[grid_s_x][grid_s_y];
 double g[grid_s_x][grid_s_y];

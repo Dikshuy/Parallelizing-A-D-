@@ -18,7 +18,7 @@ struct vertex{
 };
 vertex::vertex(int p_x, int p_y, float p_k1, float p_k2) : x{p_x}, y{p_y}, k1{p_k1}, k2{p_k2} {}
 //Goal & start
-vertex s_goal(5, 5, 0, 0);
+vertex s_goal(800, 800, 0, 0);
 vertex s_start(0, 0, 0, 0);
 int km = 0;
 
@@ -123,10 +123,14 @@ void UpdateVertex(vertex u){
     if (!isVertexEqual(u, s_goal)){
         double c[3][3];
 
-        #pragma omp parallel for collapse(2)
-        for (int i = 0; i <= 2; i++){
-            for (int j = 0; j <= 2; j++){
-                if (abs(i - 1) != abs(j - 1)){
+    #pragma omp parallel for collapse(2)
+        for (int i = 0; i <= 2; i++)
+        {
+            for (int j = 0; j <= 2; j++)
+            {
+                if (abs(i - 1) != abs(j - 1))
+                {
+
                     c[i][j] = g[u.x + i - 1][u.y + j - 1] + 1 + GRID[u.x + i - 1][u.y + j - 1] * Inf;
                     if (u.x + i - 1 > grid_s_x || u.y + j - 1 > grid_s_y || u.x + i - 1 < 0 || u.y + j - 1 < 0 || GRID[u.x + i - 1][u.y + j - 1] == 1)
                     {
@@ -196,6 +200,7 @@ void ComputeShortestPath(){
             g[u.x][u.y] = rhs[u.x][u.y];
 
             #pragma omp parallel for collapse(2)
+
             for (int i = 0; i <= 2; i++)
             {
                 for (int j = 0; j <= 2; j++)
@@ -211,8 +216,8 @@ void ComputeShortestPath(){
         {
             g[u.x][u.y] = Inf;
             cout << " => else" << endl;
-
             #pragma omp parallel for collapse(2)
+
             for (int i = 0; i <= 2; i++)
             {
                 for (int j = 0; j <= 2; j++)
