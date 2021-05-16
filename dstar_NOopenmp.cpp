@@ -19,13 +19,13 @@ struct vertex
 };
 vertex::vertex(int p_x, int p_y, float p_k1, float p_k2) : x{p_x}, y{p_y}, k1{p_k1}, k2{p_k2} {}
 //Goal & start
-vertex s_goal(10, 4, 0, 0);
+vertex s_goal(26, 30, 0, 0);
 vertex s_start(0, 0, 0, 0);
 int km = 0;
 
 //constraints
-#define grid_s_x 50
-#define grid_s_y 50
+#define grid_s_x 100
+#define grid_s_y 100
 
 double rhs[grid_s_x][grid_s_y];
 double g[grid_s_x][grid_s_y];
@@ -76,8 +76,8 @@ void showpq(m_priority_queue gq)
     {
         vertex c_v = g.top();
 
-        cout << '\t' << c_v.x << "," << c_v.y << "(" << c_v.k1 << "," << c_v.k2 << ")"
-             << "   ";
+        //       cout << '\t' << c_v.x << "," << c_v.y << "(" << c_v.k1 << "," << c_v.k2 << ")"
+        //            << "   ";
         g.pop();
     }
     cout << '\n';
@@ -136,7 +136,7 @@ vertex CalculateKey(vertex s)
 void UpdateVertex(vertex u)
 {
 
-    cout << " => Update Vertex " << u.x << "," << u.y << endl;
+    //   cout << " => Update Vertex " << u.x << "," << u.y << endl;
     if (u.x < 0 || u.x > grid_s_x || u.y < 0 || u.y > grid_s_y)
     {
         return;
@@ -151,7 +151,7 @@ void UpdateVertex(vertex u)
             {
                 if (abs(i) != abs(j))
                 {
-                    c[i + 1][j + 1] = g[u.x + i][u.y + j] + 1 + GRID[u.x + i][u.y + j];
+                    c[i + 1][j + 1] = g[u.x + i][u.y + j] + 1 + GRID[u.x + i][u.y + j] * Inf;
                 }
             }
         }
@@ -221,8 +221,8 @@ void ComputeShortestPath()
         vertex k_old = TopKey();
         pop();
         vertex u = k_old;
-        cout << " <= Selected " << u.x << "," << u.y << endl;
-        cout << k_old.k1 << "," << k_old.k2 << endl;
+        //       cout << " <= Selected " << u.x << "," << u.y << endl;
+        //       cout << k_old.k1 << "," << k_old.k2 << endl;
 
         if (isCostLower(k_old, CalculateKey(u)))
         {
@@ -232,7 +232,7 @@ void ComputeShortestPath()
         else if (g[u.x][u.y] > rhs[u.x][u.y])
         {
             g[u.x][u.y] = rhs[u.x][u.y];
-            cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
+            //          cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
 
             for (int i = -1; i <= 1; i++)
             {
@@ -248,7 +248,7 @@ void ComputeShortestPath()
         else
         {
             g[u.x][u.y] = Inf;
-            cout << " => else" << endl;
+            //          cout << " => else" << endl;
 
             for (int i = -1; i <= 1; i++)
             {
@@ -276,12 +276,17 @@ void fillGRID()
         int j = 0;
         for (int x; ss >> x; j++)
         {
-            GRID[j][i] = x;
+            GRID[j][i] = 0;
             if (ss.peek() == ',')
                 ss.ignore();
         }
         i++;
     }
+    GRID[1][1] = 1;
+    GRID[2][1] = 1;
+    GRID[3][1] = 1;
+    GRID[2][2] = 1;
+    GRID[2][3] = 1;
     textfile.close();
 }
 
@@ -290,7 +295,7 @@ int main()
 
     //Initialize
     fillGRID();
-    cout << "Successfully loaded GRID" << endl;
+    /*   cout << "Successfully loaded GRID" << endl;
 
     for (int k = 0; k < 50; k++)
     {
@@ -299,7 +304,7 @@ int main()
             cout << GRID[k][m] << " ";
         }
         cout << endl;
-    }
+    }*/
 
     km = 0;
     for (int i = 0; i < grid_s_x; i++)
@@ -316,7 +321,7 @@ int main()
     ComputeShortestPath();
     showpq(U);
 
-    cout << "Successfully loaded rhs" << endl;
+    /*    cout << "Successfully loaded rhs" << endl;
     for (int k = 0; k < 25; k++)
     {
         for (int m = 0; m < 25; m++)
@@ -324,7 +329,7 @@ int main()
             cout << g[k][m] << "\t";
         }
         cout << endl;
-    }
+    }*/
 
     return 0;
 }

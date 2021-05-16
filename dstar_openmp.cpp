@@ -20,13 +20,13 @@ struct vertex
 };
 vertex::vertex(int p_x, int p_y, float p_k1, float p_k2) : x{p_x}, y{p_y}, k1{p_k1}, k2{p_k2} {}
 //Goal & start
-vertex s_goal(10, 4, 0, 0);
+vertex s_goal(5, 5, 0, 0);
 vertex s_start(0, 0, 0, 0);
 int km = 0;
 
 //constraints
-#define grid_s_x 50
-#define grid_s_y 50
+#define grid_s_x 1000
+#define grid_s_y 1000
 
 double rhs[grid_s_x][grid_s_y];
 double g[grid_s_x][grid_s_y];
@@ -77,8 +77,8 @@ void showpq(m_priority_queue gq)
     {
         vertex c_v = g.top();
 
-        cout << '\t' << c_v.x << "," << c_v.y << "(" << c_v.k1 << "," << c_v.k2 << ")"
-             << "   ";
+        //      cout << '\t' << c_v.x << "," << c_v.y << "(" << c_v.k1 << "," << c_v.k2 << ")"
+        //           << "   ";
         g.pop();
     }
     cout << '\n';
@@ -137,7 +137,7 @@ vertex CalculateKey(vertex s)
 void UpdateVertex(vertex u)
 {
 
-    cout << " => Update Vertex " << u.x << "," << u.y << endl;
+    //   cout << " => Update Vertex " << u.x << "," << u.y << endl;
     if (u.x < 0 || u.x > grid_s_x || u.y < 0 || u.y > grid_s_y)
     {
         return;
@@ -146,26 +146,22 @@ void UpdateVertex(vertex u)
     if (!isVertexEqual(u, s_goal))
     {
         double c[3][3];
-#pragma omp parallel for collapse(2)
-        for (int i = -1; i <= 1; i++)
+
+        //#pragma omp parallel for collapse(2)
+        for (int i = 0; i <= 2; i++)
         {
-            for (int j = -1; j <= 1; j++)
+            for (int j = 0; j <= 2; j++)
             {
-                if (abs(i) != abs(j))
+                if (abs(i - 1) != abs(j - 1))
                 {
-                    c[i + 1][j + 1] = g[u.x + i][u.y + j] + 1 + GRID[u.x + i][u.y + j];
+                    c[i][j] = g[u.x + i - 1][u.y + j - 1] + 1 + GRID[u.x + i - 1][u.y + j - 1] * Inf;
+                    if (u.x + i - 1 > grid_s_x || u.y + j - 1 > grid_s_y || u.x + i - 1 < 0 || u.y + j - 1 < 0 || GRID[u.x + i - 1][u.y + j - 1] == 1)
+                    {
+                        c[i][j] == Inf;
+                    }
                 }
             }
         }
-
-        if (u.y + 1 > grid_s_y || GRID[u.x][u.y + 1] == 1)
-            c[1][2] = Inf;
-        if (u.x + 1 > grid_s_x || GRID[u.x + 1][u.y] == 1)
-            c[2][1] = Inf;
-        if (u.y - 1 < 0 || GRID[u.x][u.y - 1] == 1)
-            c[1][0] = Inf;
-        if (u.x - 1 < 0 || GRID[u.x - 1][u.y] == 1)
-            c[0][1] = Inf;
 
         rhs[u.x][u.y] = min(min(c[1][2], c[2][1]), min(c[1][0], c[0][1]));
     }
@@ -223,8 +219,8 @@ void ComputeShortestPath()
         vertex k_old = TopKey();
         pop();
         vertex u = k_old;
-        cout << " <= Selected " << u.x << "," << u.y << endl;
-        cout << k_old.k1 << "," << k_old.k2 << endl;
+        //     cout << " <= Selected " << u.x << "," << u.y << endl;
+        //     cout << k_old.k1 << "," << k_old.k2 << endl;
 
         if (isCostLower(k_old, CalculateKey(u)))
         {
@@ -234,17 +230,16 @@ void ComputeShortestPath()
         else if (g[u.x][u.y] > rhs[u.x][u.y])
         {
             g[u.x][u.y] = rhs[u.x][u.y];
-            cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
+            //          cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
 
-#pragma omp parallel for
-            for (int i = -1; i <= 1; i++)
+            //#pragma omp parallel for collapse(2)
+            for (int i = 0; i <= 2; i++)
             {
-#pragma omp parallel for
-                for (int j = -1; j <= 1; j++)
+                for (int j = 0; j <= 2; j++)
                 {
-                    if (abs(i) != abs(j))
+                    if (abs(i - 1) != abs(j - 1))
                     {
-                        UpdateVertex(vertex(u.x + i, u.y + j, 0, 0));
+                        UpdateVertex(vertex(u.x + i - 1, u.y + j - 1, 0, 0));
                     }
                 }
             }
@@ -254,15 +249,14 @@ void ComputeShortestPath()
             g[u.x][u.y] = Inf;
             cout << " => else" << endl;
 
-#pragma omp parallel for
-            for (int i = -1; i <= 1; i++)
+            //#pragma omp parallel for collapse(2)
+            for (int i = 0; i <= 2; i++)
             {
-#pragma omp parallel for
-                for (int j = -1; j <= 1; j++)
+                for (int j = 0; j <= 2; j++)
                 {
-                    if (abs(i) != abs(j) || (i == 0 && j == 0))
+                    if (abs(i - 1) != abs(j - 1) || (i == 1 && j == 1))
                     {
-                        UpdateVertex(vertex(u.x + i, u.y + j, 0, 0));
+                        UpdateVertex(vertex(u.x + i - 1, u.y + j - 1, 0, 0));
                     }
                 }
             }
@@ -289,15 +283,20 @@ void fillGRID()
         }
         i++;
     }
+    GRID[1][1] = 1;
+    GRID[2][1] = 1;
+    GRID[3][1] = 1;
+    GRID[2][2] = 1;
+    GRID[2][3] = 1;
     textfile.close();
 }
 
 int main()
 {
-
+    omp_set_num_threads(8);
     //Initialize
     fillGRID();
-    cout << "Successfully loaded GRID" << endl;
+    /*   cout << "Successfully loaded GRID" << endl;
 
     for (int k = 0; k < 50; k++)
     {
@@ -306,11 +305,13 @@ int main()
             cout << GRID[k][m] << " ";
         }
         cout << endl;
-    }
+    }*/
 
     km = 0;
 
+#pragma omp parallel for
     for (int i = 0; i < grid_s_x; i++)
+#pragma omp parallel for
         for (int j = 0; j < grid_s_y; j++)
         {
             rhs[i][j] = Inf;
@@ -324,7 +325,7 @@ int main()
     ComputeShortestPath();
     showpq(U);
 
-    cout << "Successfully loaded rhs" << endl;
+    /*   cout << "Successfully loaded rhs" << endl;
 
     for (int k = 0; k < 25; k++)
     {
@@ -333,7 +334,6 @@ int main()
             cout << g[k][m] << "\t";
         }
         cout << endl;
-    }
-
+    }*/
     return 0;
 }
