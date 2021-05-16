@@ -4,7 +4,7 @@
 #include <queue>
 #include <string>
 #include <math.h>
-#include<omp.h>
+#include <omp.h>
 
 using namespace std; 
 
@@ -86,9 +86,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
     open_nodes_map[x][y]=n0->getPriority(); 
 
     // A* search
-    while(!pq[pqi].empty())
-    {
-        // get the current node w/ the highest priorityvfrom the list of open nodes
+    while(!pq[pqi].empty()){
         n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), 
                      pq[pqi].top().getLevel(), pq[pqi].top().getPriority());
 

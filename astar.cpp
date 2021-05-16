@@ -7,8 +7,8 @@
 
 using namespace std; 
 
-#define ROW 200
-#define COL 200
+#define ROW 10
+#define COL 10
 
 static int map[ROW][COL];
 static int closed_nodes_map[ROW][COL]; // map of closed (tried-out) nodes
@@ -85,9 +85,7 @@ string pathFind( const int & xStart, const int & yStart, const int & xFinish, co
     open_nodes_map[x][y]=n0->getPriority(); 
 
     // A* search
-    while(!pq[pqi].empty())
-    {
-        // get the current node w/ the highest priorityvfrom the list of open nodes
+    while(!pq[pqi].empty()){
         n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), 
                      pq[pqi].top().getLevel(), pq[pqi].top().getPriority());
 

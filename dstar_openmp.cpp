@@ -9,9 +9,7 @@
 double Inf = 10e9;
 using namespace std;
 
-struct vertex
-{ //Stores a vertex along with k1,k2 Costs
-
+struct vertex{
     int x, y;
     float k1;
     float k2;
@@ -37,16 +35,12 @@ bool Ukey[grid_s_x][grid_s_y];
 float Ukey_k1[grid_s_x][grid_s_y];
 float Ukey_k2[grid_s_x][grid_s_y];
 
-struct compare
-{ //Custom Comparison Function
-    bool operator()(const vertex &a, const vertex &b)
-    {
-        if (a.k1 > b.k1)
-        {
+struct compare{ 
+    bool operator()(const vertex &a, const vertex &b){
+        if (a.k1 > b.k1){
             return 1;
         }
-        else if ((a.k1 == b.k1))
-        {
+        else if ((a.k1 == b.k1)){
             if (a.k2 > b.k2)
                 return 1;
             else
@@ -57,8 +51,7 @@ struct compare
     }
 };
 
-bool isVertexEqual(vertex v1, vertex v2)
-{
+bool isVertexEqual(vertex v1, vertex v2){
     if (v1.x == v2.x && v1.y == v2.y)
     {
         return 1;
@@ -70,37 +63,28 @@ typedef priority_queue<vertex, vector<vertex>, compare> m_priority_queue; //Min 
 
 m_priority_queue U;
 
-void showpq(m_priority_queue gq)
-{
+void showpq(m_priority_queue gq){
     m_priority_queue g = gq;
     while (!g.empty())
     {
         vertex c_v = g.top();
-
-        //      cout << '\t' << c_v.x << "," << c_v.y << "(" << c_v.k1 << "," << c_v.k2 << ")"
-        //           << "   ";
         g.pop();
     }
     cout << '\n';
 }
 
-double h(vertex s1, vertex s2)
-{
-    //heuristic function
+double h(vertex s1, vertex s2){
     return sqrt(pow((s1.x - s2.x), 2) + pow((s1.y - s2.y), 2));
 }
 
-bool isInQueue(vertex s)
-{
-    if (Ukey[s.x][s.y] == 1)
-    {
+bool isInQueue(vertex s){
+    if (Ukey[s.x][s.y] == 1){
         return 1;
     }
     return 0;
 }
 
-void pushToQueue(vertex s)
-{
+void pushToQueue(vertex s){
     U.push(s);
     Ukey[s.x][s.y] = 1;
     Ukey_k1[s.x][s.y] = s.k1;
@@ -109,12 +93,10 @@ void pushToQueue(vertex s)
 
 bool isCostLower(vertex b, vertex a)
 {
-    if (a.k1 > b.k1)
-    {
+    if (a.k1 > b.k1){
         return 1;
     }
-    else if (a.k1 == b.k1)
-    {
+    else if (a.k1 == b.k1){
         if (a.k2 > b.k2)
             return 1;
         else
@@ -124,8 +106,7 @@ bool isCostLower(vertex b, vertex a)
         return 0;
 }
 
-vertex CalculateKey(vertex s)
-{
+vertex CalculateKey(vertex s){
     double k1 = min(g[s.x][s.y], rhs[s.x][s.y]) + h(s_start, s) + km;
     double k2 = min(g[s.x][s.y], rhs[s.x][s.y]);
 
@@ -134,26 +115,18 @@ vertex CalculateKey(vertex s)
     return s;
 }
 
-void UpdateVertex(vertex u)
-{
-
-    //   cout << " => Update Vertex " << u.x << "," << u.y << endl;
-    if (u.x < 0 || u.x > grid_s_x || u.y < 0 || u.y > grid_s_y)
-    {
+void UpdateVertex(vertex u){
+    if (u.x < 0 || u.x > grid_s_x || u.y < 0 || u.y > grid_s_y){
         return;
     }
 
-    if (!isVertexEqual(u, s_goal))
-    {
+    if (!isVertexEqual(u, s_goal)){
         double c[3][3];
 
-        //#pragma omp parallel for collapse(2)
-        for (int i = 0; i <= 2; i++)
-        {
-            for (int j = 0; j <= 2; j++)
-            {
-                if (abs(i - 1) != abs(j - 1))
-                {
+        #pragma omp parallel for collapse(2)
+        for (int i = 0; i <= 2; i++){
+            for (int j = 0; j <= 2; j++){
+                if (abs(i - 1) != abs(j - 1)){
                     c[i][j] = g[u.x + i - 1][u.y + j - 1] + 1 + GRID[u.x + i - 1][u.y + j - 1] * Inf;
                     if (u.x + i - 1 > grid_s_x || u.y + j - 1 > grid_s_y || u.x + i - 1 < 0 || u.y + j - 1 < 0 || GRID[u.x + i - 1][u.y + j - 1] == 1)
                     {
@@ -166,34 +139,29 @@ void UpdateVertex(vertex u)
         rhs[u.x][u.y] = min(min(c[1][2], c[2][1]), min(c[1][0], c[0][1]));
     }
     u = CalculateKey(u);
-    if (isInQueue(u))
-    {
-        Ukey[u.x][u.y] = 0; //remove from Priority Queue
+    if (isInQueue(u)){
+        Ukey[u.x][u.y] = 0; 
     }
-    if (rhs[u.x][u.y] != g[u.x][u.y])
-    {
+    if (rhs[u.x][u.y] != g[u.x][u.y]){
         pushToQueue(u);
     }
 }
 
 bool isGhost(vertex s)
 {
-    if (Ukey[s.x][s.y] == 1 && Ukey_k1[s.x][s.y] == s.k1 && Ukey_k2[s.x][s.y] == s.k2)
-    {
+    if (Ukey[s.x][s.y] == 1 && Ukey_k1[s.x][s.y] == s.k1 && Ukey_k2[s.x][s.y] == s.k2){
         return 0;
     }
     return 1;
 }
 
-void pop()
-{
+void pop(){
     vertex s = U.top();
     Ukey[s.x][s.y] = 0;
     U.pop();
 }
 
-vertex TopKey()
-{
+vertex TopKey(){
     if (U.size() == 0)
         return vertex(-1, -1, Inf, Inf);
 
@@ -209,9 +177,7 @@ vertex TopKey()
     return temp; //return top most vertex which isn't a ghost
 }
 
-void ComputeShortestPath()
-{
-
+void ComputeShortestPath(){
     while (isCostLower(TopKey(), CalculateKey(s_start)) ||
            rhs[s_start.x][s_start.y] != g[s_start.x][s_start.y])
     {
@@ -219,8 +185,6 @@ void ComputeShortestPath()
         vertex k_old = TopKey();
         pop();
         vertex u = k_old;
-        //     cout << " <= Selected " << u.x << "," << u.y << endl;
-        //     cout << k_old.k1 << "," << k_old.k2 << endl;
 
         if (isCostLower(k_old, CalculateKey(u)))
         {
@@ -230,9 +194,8 @@ void ComputeShortestPath()
         else if (g[u.x][u.y] > rhs[u.x][u.y])
         {
             g[u.x][u.y] = rhs[u.x][u.y];
-            //          cout << " => g[u.x][u.y] > rhs[u.x][u.y]" << endl;
 
-            //#pragma omp parallel for collapse(2)
+            #pragma omp parallel for collapse(2)
             for (int i = 0; i <= 2; i++)
             {
                 for (int j = 0; j <= 2; j++)
@@ -249,7 +212,7 @@ void ComputeShortestPath()
             g[u.x][u.y] = Inf;
             cout << " => else" << endl;
 
-            //#pragma omp parallel for collapse(2)
+            #pragma omp parallel for collapse(2)
             for (int i = 0; i <= 2; i++)
             {
                 for (int j = 0; j <= 2; j++)
